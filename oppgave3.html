@@ -169,7 +169,7 @@
                 const hytteFra = valgtHytter[i-1];
                 const hytteTil = valgtHytter[i];
                 antallKm += hytter[hytteFra][hytteTil];
-                infoEl.innerHTML += " - " + valgtHytter[i];
+                infoEl.innerHTML += ` - ${hytter[hytteFra][hytteTil]} km - ${valgtHytter[i]}`;
             }
 
             infoEl.innerHTML += `<br> Turlengde: ${antallKm} km`;
