@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hytte til hytte</title>
+    <link rel="stylesheet" href="brukerinput.css">
+    <style>
+        body{
+            font-family: "Century Gothic", Arial, Sans-Serif;
+        }
+
+        main article{
+            display: flex;
+        }
+        main article button {
+            flex-basis: 200px;
+            transition: background-color 0.5s;
+        }
+
+        #info{
+            margin-top: 1em;
+        }
+
+        .valgbar {
+            display: block;
+        }
+
+        .valgt {
+            background-color: forestgreen;
+            display: block;
+        }
+
+        .ikke-valgbar {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+<h1>Velg hvilke hytter du skal gå mellom</h1>
+<main>
+    <div id="hytte-knapper"></div>
+    <div id="info"></div>
+</main>
+
+<script>
+
+    // DOM
+    let hytteKnapperKontainer = document.querySelector("#hytte-knapper");
+    let infoEl = document.querySelector("#info");
+
+    // Holder koll på hvilke hytter som er valgt
+    let valgtHytter = [];
+
+    // Lagrer alle hytteknappene
+    let hytteKnapper = [];
+
+    // Hvor mange hytter kan man velge?
+    const antallHytter = 3;
+
+    // Data
+    let hytter = {
+        Gjendesheim: {
+            Glitterheim: 22,
+            Memurubu: 14
+        },
+        Glitterheim: {
+            Gjendesheim: 22,
+            Memurubu: 18,
+            Spiterstulen: 17
+        },
+        Memurubu: {
+            Gjendesheim: 14,
+            Glitterheim: 18,
+            Gjendebu: 10
+        },
+        Gjendebu: {
+            Memurubu: 10,
+            Leirvassbu: 19,
+            Spiterstulen: 24,
+            Olavsbu: 16
+        },
+        Leirvassbu: {
+            Gjendebu: 19,
+            Spiterstulen: 15,
+            Olavsbu: 11
+        },
+        Spiterstulen: {
+            Glitterheim: 17,
+            Gjendebu: 24,
+            Leirvassbu: 15
+        },
+        Olavsbu: {
+            Gjendebu: 16,
+            Leirvassbu: 11
+        }
+    };
+
+    // Tegner alle hytte-knappene
+    function setUp(){
+
+        for (let i = 0; i < antallHytter; i++) {
+            let nyeHytter = {};
+            let knappRad = document.createElement("article");
+
+            for (let hytte in hytter){
+                let nyHytte = document.createElement("button");
+                nyHytte.innerHTML = hytte;
+                nyHytte.onclick = velgHytte;
+                nyHytte.dataset.nr = i;
+                nyHytte.dataset.hytte = hytte;
+                knappRad.appendChild(nyHytte);
+
+                // Lagrer knappelementet for seinere
+                nyeHytter[hytte] = nyHytte;
+
+                // Gjør hytten som ikke er på rad 1 ikke valgbare
+                if (i>0){
+                    nyHytte.className = "ikke-valgbar";
+                }else{
+                    nyHytte.className = "valgbar";
+                }
+            }
+            hytteKnapperKontainer.appendChild(knappRad);
+            hytteKnapper.push(nyeHytter);
+
+        }
+    }
+
+    // Lytterfunksjon som velger en hytte
+    function velgHytte(event){
+        let hytteKnapp = event.target;
+
+        // Henter ut hvilken knapp som er valgt
+        hytteNr = Number(hytteKnapp.dataset.nr);
+        valgtHytte = hytteKnapp.dataset.hytte;
+
+        console.log(hytteNr, valgtHytte);
+
+        // Velger man en hytte som allerede er valgt gjør vi ikke noe
+        if (valgtHytter[hytteNr] === valgtHytte){
+            return;
+        }
+
+        // Sletter hytter som er lagret
+        valgtHytter = valgtHytter.slice(0, hytteNr);
+
+        // Lagrer den valgte hytten og sletter hyttene
+        valgtHytter.push(valgtHytte);
+
+        // Starter å skrive ut en beskjed om hvilke hytter som er valgt
+        infoEl.innerHTML = "Valgte Hytter: " + valgtHytter[0];
+
+
+        // Endrer på valgbare hytter tilbake til originalfargen
+        if (hytteNr === 0){
+            for (let hytte in hytter){
+                hytteKnapper[hytteNr][hytte].className = "";
+            }
+
+        }else {
+            for (let hytte in hytter[valgtHytter[hytteNr-1]]) {
+                hytteKnapper[hytteNr][hytte].className = "";
+            }
+
+            let antallKm = 0;
+            for (let i = 1; i <= hytteNr; i++) {
+                const hytteFra = valgtHytter[i-1];
+                const hytteTil = valgtHytter[i];
+                antallKm += hytter[hytteFra][hytteTil];
+                infoEl.innerHTML += " - " + valgtHytter[i];
+            }
+
+            infoEl.innerHTML += `<br> Turlengde: ${antallKm} km`;
+        }
+
+        // Velger hytten!
+        hytteKnapp.className = "valgt";
+
+        // Setter klassen til 2e og/eller 3e hytte ikke valgbare
+        for (let i = hytteNr+1; i < hytteKnapper.length; i++) {
+            for (let hytte in hytteKnapper[i]) {
+                hytteKnapper[i][hytte].className = "ikke-valgbar";
+            }
+        }
+
+        // Hvis det ikke er siste hytte som er valgt?
+        if (hytteNr !== (hytteKnapper.length - 1)) {
+
+            // Finner hvilke hytter som er valgbare for "neste hytte"
+            for (let hytte in hytter[valgtHytte]) {
+                hytteKnapper[hytteNr + 1][hytte].className = "valgbar";
+            }
+        }
+    }
+
+
+    window.onload = setUp;
+</script>
+</body>
+</html>
