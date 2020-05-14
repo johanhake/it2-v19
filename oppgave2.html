@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="brukerinput.css">
+    <title>Oppgave 2 V19</title>
+    <style>
+        body{
+            font-family: Arial, Helvetica, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <form onsubmit="beregn(event)">
+        <h2>Skriv inn bredde og høyde til et bilde:</h2>
+        <label for="inpBredde">Bredde</label>
+        <input id="inpBredde" type="number" min=1 max=1920 placeholder="piksler" required>
+        <label for="inpHøyde">Høyde</label>
+        <input id="inpHøyde" type="number" min=1 placeholder="piksler" required>
+        <button>Beregn</button>
+    </form>
+    <p></p>
+    <img src="">
+
+    <script>
+
+        // DOM
+        let inpBredde = document.querySelector("#inpBredde");
+        let inpHøyde = document.querySelector("#inpHøyde");
+        let skjema = document.querySelector("form");
+        let tekst = document.querySelector("p");
+        let img = document.querySelector("img");
+
+        // Lytterfunksjon for å beregne antall piksel
+        function beregn(event){
+
+            // Forhindrer at siden lades på nytt
+            event.preventDefault();
+
+            // Henter ut verdiene fra bredde og lengde og gjør om de 
+            // til tall-verdier
+            let bredde = Number(inpBredde.value);
+            let høyde = Number(inpHøyde.value);
+
+            tekst.innerHTML = `Bildet har ${bredde*høyde} piksler og ${bredde*høyde/1000000} megapiksler og er`;
+
+            // Sjekker bredde mot høyde
+            if(bredde > høyde){
+                img.src = 'bilder/liggende.png';
+            }else if(bredde < høyde){
+                img.src = 'bilder/stående.png';
+            }else{
+                img.src = 'bilder/kvadratisk.png';
+            }
+
+            // Sletter alle verdiene i skjemaet!
+            skjema.reset();
+        }
+
+
+
+    </script>
+</body>
+</html>

@@ -1,23 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Hytte til hytte</title>
     <link rel="stylesheet" href="brukerinput.css">
     <style>
-        body{
+        body {
             font-family: "Century Gothic", Arial, Sans-Serif;
         }
 
-        main article{
+        main>div>div {
             display: flex;
+            flex-direction: row;
         }
-        main article button {
-            flex-basis: 200px;
+
+        main>div>div>button {
+            flex-basis: 150px;
             transition: background-color 0.5s;
         }
 
-        #info{
+        #info {
             margin-top: 1em;
         }
 
@@ -33,170 +36,200 @@
         .ikke-valgbar {
             display: none;
         }
-
     </style>
 </head>
+
 <body>
 
-<h1>Velg hvilke hytter du skal gå mellom</h1>
-<main>
-    <div id="hytte-knapper"></div>
-    <div id="info"></div>
-</main>
+    <h1>Velg hvilke hytter du skal gå mellom</h1>
+    <main>
+        <div id="hytte-knapper"></div>
+        <div id="info"></div>
+    </main>
 
-<script>
+    <script>
 
-    // DOM
-    let hytteKnapperKontainer = document.querySelector("#hytte-knapper");
-    let infoEl = document.querySelector("#info");
+        // DOM
+        let hytteKnapperKontainer = document.querySelector("#hytte-knapper");
+        let infoEl = document.querySelector("#info");
 
-    // Holder koll på hvilke hytter som er valgt
-    let valgtHytter = [];
+        // Liste med som holder koll på hytter som er blitt valgt
+        let valgtHytter = [];
 
-    // Lagrer alle hytteknappene
-    let hytteKnapper = [];
+        // Alle hytteknappene
+        let hytteKnapper = [];
 
-    // Hvor mange hytter kan man velge?
-    const antallHytter = 8;
+        // Hvor mange hytter kan man velge?
+        const antallHytter = 3;
 
-    // Data
-    let hytter = {
-        Gjendesheim: {
-            Glitterheim: 22,
-            Memurubu: 14
-        },
-        Glitterheim: {
-            Gjendesheim: 22,
-            Memurubu: 18,
-            Spiterstulen: 17
-        },
-        Memurubu: {
-            Gjendesheim: 14,
-            Glitterheim: 18,
-            Gjendebu: 10
-        },
-        Gjendebu: {
-            Memurubu: 10,
-            Leirvassbu: 19,
-            Spiterstulen: 24,
-            Olavsbu: 16
-        },
-        Leirvassbu: {
-            Gjendebu: 19,
-            Spiterstulen: 15,
-            Olavsbu: 11
-        },
-        Spiterstulen: {
-            Glitterheim: 17,
-            Gjendebu: 24,
-            Leirvassbu: 15
-        },
-        Olavsbu: {
-            Gjendebu: 16,
-            Leirvassbu: 11
+        // Data
+        let hytter = {
+            Gjendesheim: {
+                Glitterheim: 22,
+                Memurubu: 14
+            },
+            Glitterheim: {
+                Gjendesheim: 22,
+                Memurubu: 18,
+                Spiterstulen: 17
+            },
+            Memurubu: {
+                Gjendesheim: 14,
+                Glitterheim: 18,
+                Gjendebu: 10
+            },
+            Gjendebu: {
+                Memurubu: 10,
+                Leirvassbu: 19,
+                Spiterstulen: 24,
+                Olavsbu: 16
+            },
+            Leirvassbu: {
+                Gjendebu: 19,
+                Spiterstulen: 15,
+                Olavsbu: 11
+            },
+            Spiterstulen: {
+                Glitterheim: 17,
+                Gjendebu: 24,
+                Leirvassbu: 15
+            },
+            Olavsbu: {
+                Gjendebu: 16,
+                Leirvassbu: 11
+            }
+        };
+
+        // Tegner alle hytte-knappene
+        function setUp() {
+
+            // Yttre loop som går igjennom antall hytter man kan besøke (3 i vårt fall)
+            // For hver gjentagelse lages 7 ulike hytte-knapper
+            for (let i = 0; i < antallHytter; i++) {
+
+                // Lokalt objekt som holder på knappene som blir lagd i denne yttre gjentagelsen
+                // Et objekt blir lagd per 7 mulige hytter som kan velges.
+                let nyeHytter = {};
+                let knappRad = document.createElement("div");
+
+                // Lager alle 7 knappene med createElement
+                for (let hytte in hytter) {
+
+                    // Lager hytte-knappen
+                    let nyHytte = document.createElement("button");
+
+                    // Pynter knappen med ulik tekst og attributter
+                    nyHytte.innerHTML = hytte;
+                    nyHytte.onclick = velgHytte;
+                    nyHytte.dataset.nr = i;
+                    nyHytte.dataset.hytte = hytte;
+
+                    // Legger til knappen i diven
+                    knappRad.appendChild(nyHytte);
+
+                    // Lagrer knappelementet for seinere
+                    nyeHytter[hytte] = nyHytte;
+
+                    // Gjør hytten som ikke er på rad 1 ikke valgbare
+                    if (i > 0) {
+                        nyHytte.className = "ikke-valgbar";
+                    } else {
+                        nyHytte.className = "valgbar";
+                    }
+                }
+
+                // Legger til raden til kontaineren slik at raden blir synelig
+                hytteKnapperKontainer.appendChild(knappRad);
+
+                // Legger til objektet med hytteknapper inn i listen hytteKnapper
+                hytteKnapper.push(nyeHytter);
+
+            }
         }
-    };
 
-    // Tegner alle hytte-knappene
-    function setUp(){
+        // Lytterfunksjon som velger en hytte
+        function velgHytte(event) {
 
-        for (let i = 0; i < antallHytter; i++) {
-            let nyeHytter = {};
-            let knappRad = document.createElement("article");
+            // Henter ut knappen som ble valgt
+            let hytteKnapp = event.target;
 
-            for (let hytte in hytter){
-                let nyHytte = document.createElement("button");
-                nyHytte.innerHTML = hytte;
-                nyHytte.onclick = velgHytte;
-                nyHytte.dataset.nr = i;
-                nyHytte.dataset.hytte = hytte;
-                knappRad.appendChild(nyHytte);
+            // Henter ut hvilken knapp som er valgt
+            hytteNr = Number(hytteKnapp.dataset.nr);
+            valgtHytte = hytteKnapp.dataset.hytte;
 
-                // Lagrer knappelementet for seinere
-                nyeHytter[hytte] = nyHytte;
+            console.log(hytteNr, valgtHytte);
 
-                // Gjør hytten som ikke er på rad 1 ikke valgbare
-                if (i>0){
-                    nyHytte.className = "ikke-valgbar";
-                }else{
-                    nyHytte.className = "valgbar";
+            // Velger man en hytte som allerede er valgt gjør vi ikke noe
+            if (valgtHytter[hytteNr] === valgtHytte) {
+                return;
+            }
+
+            // Tar vare på alle hytter som ligger mellom 0 og nr på hytten
+            // Vi sletter altså alle hyttene som er blitt valgt etter akkurat dette nummeret.
+            valgtHytter = valgtHytter.slice(0, hytteNr);
+
+            // Lagrer den valgte hytten
+            valgtHytter.push(valgtHytte);
+
+            // Starter å skrive ut en beskjed om hvilke hytter som er valgt
+            infoEl.innerHTML = "Valgte Hytter: " + valgtHytter[0];
+
+
+            // Har jeg valgt min første hytte? Da trenger vi IKKE å vise hvor langt vi har gått. 
+            if (hytteNr === 0) {
+
+                // Endrer tilbake ev-knappfarger til ursprungs-fargen hvis det er rad 0
+                // Valgt hytte har grønn farge.
+                for (let hytte in hytter) {
+                    hytteKnapper[hytteNr][hytte].className = "";
+                }
+
+            } else {
+
+                // Endrer tilbake ev-knappfarger til ursprungs-fargen hvis det er rad 1-2
+                // Valgt hytte har grønn farge.
+                for (let hytte in hytter[valgtHytter[hytteNr - 1]]) {
+                    hytteKnapper[hytteNr][hytte].className = "";
+                }
+
+                // Teller opp antal km man har gått. 
+                let antallKm = 0;
+
+                // Starter fra hytte 1->hytterNr
+                for (let i = 1; i <= hytteNr; i++) {
+                    const hytteFra = valgtHytter[i - 1];
+                    const hytteTil = valgtHytter[i];
+                    antallKm += hytter[hytteFra][hytteTil];
+                    infoEl.innerHTML += ` - ${hytter[hytteFra][hytteTil]} km - ${valgtHytter[i]}`;
+                }
+
+                infoEl.innerHTML += `<br> Total turlengde: ${antallKm} km`;
+            }
+
+            // Velger hytten! (Den blir farget grønn!)
+            hytteKnapp.className = "valgt";
+
+            // Dobbel for loop som skjuler (class="ikke-valgbar") på alle hyttene på hytter nr 
+            // som er etter det hyttenr vi er på. 
+            for (let i = hytteNr + 1; i < hytteKnapper.length; i++) {
+                for (let hytte in hytteKnapper[i]) {
+                    hytteKnapper[i][hytte].className = "ikke-valgbar";
                 }
             }
-            hytteKnapperKontainer.appendChild(knappRad);
-            hytteKnapper.push(nyeHytter);
 
-        }
-    }
+            // Hvis det ikke er siste hytte som er valgt?
+            if (hytteNr !== (hytteKnapper.length - 1)) {
 
-    // Lytterfunksjon som velger en hytte
-    function velgHytte(event){
-        let hytteKnapp = event.target;
-
-        // Henter ut hvilken knapp som er valgt
-        hytteNr = Number(hytteKnapp.dataset.nr);
-        valgtHytte = hytteKnapp.dataset.hytte;
-
-        console.log(hytteNr, valgtHytte);
-
-        // Velger man en hytte som allerede er valgt gjør vi ikke noe
-        if (valgtHytter[hytteNr] === valgtHytte){
-            return;
-        }
-
-        // Sletter hytter som er lagret
-        valgtHytter = valgtHytter.slice(0, hytteNr);
-
-        // Lagrer den valgte hytten og sletter hyttene
-        valgtHytter.push(valgtHytte);
-
-        // Starter å skrive ut en beskjed om hvilke hytter som er valgt
-        infoEl.innerHTML = "Valgte Hytter: " + valgtHytter[0];
-
-
-        // Endrer på valgbare hytter tilbake til originalfargen
-        if (hytteNr === 0){
-            for (let hytte in hytter){
-                hytteKnapper[hytteNr][hytte].className = "";
-            }
-
-        }else {
-            for (let hytte in hytter[valgtHytter[hytteNr-1]]) {
-                hytteKnapper[hytteNr][hytte].className = "";
-            }
-
-            let antallKm = 0;
-            for (let i = 1; i <= hytteNr; i++) {
-                const hytteFra = valgtHytter[i-1];
-                const hytteTil = valgtHytter[i];
-                antallKm += hytter[hytteFra][hytteTil];
-                infoEl.innerHTML += ` - ${hytter[hytteFra][hytteTil]} km - ${valgtHytter[i]}`;
-            }
-
-            infoEl.innerHTML += `<br> Total turlengde: ${antallKm} km`;
-        }
-
-        // Velger hytten!
-        hytteKnapp.className = "valgt";
-
-        // Setter klassen til 2e og/eller 3e hytte ikke valgbare
-        for (let i = hytteNr+1; i < hytteKnapper.length; i++) {
-            for (let hytte in hytteKnapper[i]) {
-                hytteKnapper[i][hytte].className = "ikke-valgbar";
+                // Finner hvilke hytter som er valgbare for "neste hytte"
+                for (let hytte in hytter[valgtHytte]) {
+                    hytteKnapper[hytteNr + 1][hytte].className = "valgbar";
+                }
             }
         }
 
-        // Hvis det ikke er siste hytte som er valgt?
-        if (hytteNr !== (hytteKnapper.length - 1)) {
 
-            // Finner hvilke hytter som er valgbare for "neste hytte"
-            for (let hytte in hytter[valgtHytte]) {
-                hytteKnapper[hytteNr + 1][hytte].className = "valgbar";
-            }
-        }
-    }
-
-
-    window.onload = setUp;
-</script>
+        window.onload = setUp;
+    </script>
 </body>
+
 </html>
